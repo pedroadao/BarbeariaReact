@@ -1,7 +1,9 @@
+import { useMemo, useState } from 'react'
 import { HttpError } from '../../../lib/http/httpClient'
 import { useBarbeiros } from '../../barbeiros/hooks/useBarbeiros'
 import { useClientes } from '../../clientes/hooks/useClientes'
 import { AgendamentoForm } from '../components/AgendamentoForm'
+import { AgendamentosCalendar } from '../components/AgendamentosCalendar'
 import { useAgendamentos, useCreateAgendamento, useDeleteAgendamento } from '../hooks/useAgendamentos'
 import type { AgendamentoFormValues } from '../schemas/agendamentoSchema'
 
@@ -16,6 +18,13 @@ export function AgendamentosPage() {
   const { data: clientes } = useClientes()
   const createMutation = useCreateAgendamento()
   const deleteMutation = useDeleteAgendamento()
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+
+  const agendamentosExibidos = useMemo(() => {
+    if (!agendamentos) return agendamentos
+    if (!selectedDate) return agendamentos
+    return agendamentos.filter((agendamento) => agendamento.data === selectedDate)
+  }, [agendamentos, selectedDate])
 
   function nomeBarbeiro(idBarbeiro: number): string {
     return barbeiros?.find((barbeiro) => barbeiro.id === idBarbeiro)?.nome ?? `Barbeiro #${idBarbeiro}`
@@ -45,14 +54,34 @@ export function AgendamentosPage() {
       <AgendamentoForm isSubmitting={createMutation.isPending} onSubmit={handleCreate} />
       {createMutation.isError && <p role="alert">{errorMessage(createMutation.error)}</p>}
 
+      <h2>Agenda dos barbeiros</h2>
+      {!isLoading && !isError && (
+        <AgendamentosCalendar
+          agendamentos={agendamentos ?? []}
+          barbeiros={barbeiros ?? []}
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+        />
+      )}
+
       <h2>Lista de horários</h2>
       {isLoading && <p>Carregando agendamentos...</p>}
       {isError && <p role="alert">{errorMessage(error)}</p>}
-      {!isLoading && !isError && agendamentos?.length === 0 && <p>Nenhum horário cadastrado.</p>}
+      {selectedDate && (
+        <p>
+          Filtrando por {selectedDate}.{' '}
+          <button type="button" onClick={() => setSelectedDate(null)}>
+            Limpar filtro
+          </button>
+        </p>
+      )}
+      {!isLoading && !isError && agendamentosExibidos?.length === 0 && (
+        <p>{selectedDate ? 'Nenhum horário cadastrado para esta data.' : 'Nenhum horário cadastrado.'}</p>
+      )}
 
-      {agendamentos && agendamentos.length > 0 && (
+      {agendamentosExibidos && agendamentosExibidos.length > 0 && (
         <ul>
-          {agendamentos.map((agendamento) => (
+          {agendamentosExibidos.map((agendamento) => (
             <li key={agendamento.id}>
               <span>
                 {nomeBarbeiro(agendamento.idBarbeiro)} — {agendamento.data} {agendamento.horaInicio}–
