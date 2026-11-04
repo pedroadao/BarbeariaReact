@@ -1,4 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import Button from '@mui/material/Button'
+import Stack from '@mui/material/Stack'
+import TextField from '@mui/material/TextField'
 import { useForm } from 'react-hook-form'
 import { useBarbeiros } from '../../barbeiros/hooks/useBarbeiros'
 import { useClientes } from '../../clientes/hooks/useClientes'
@@ -29,23 +32,31 @@ export function AgendamentoForm({ isSubmitting, onSubmit }: AgendamentoFormProps
 
   return (
     <form onSubmit={handleSubmit(submit)} noValidate>
-      <div>
-        <label htmlFor="agendamento-barbeiro">Barbeiro</label>
-        <select id="agendamento-barbeiro" {...register('idBarbeiro', { valueAsNumber: true })}>
+      <Stack spacing={2} sx={{ maxWidth: 420 }}>
+        <TextField
+          id="agendamento-barbeiro"
+          label="Barbeiro"
+          select
+          slotProps={{ select: { native: true }, inputLabel: { shrink: true } }}
+          error={!!errors.idBarbeiro}
+          helperText={errors.idBarbeiro?.message}
+          {...register('idBarbeiro', { valueAsNumber: true })}
+        >
           <option value={0}>Selecione um barbeiro</option>
           {barbeiros?.map((barbeiro) => (
             <option key={barbeiro.id} value={barbeiro.id}>
               {barbeiro.nome}
             </option>
           ))}
-        </select>
-        {errors.idBarbeiro && <p role="alert">{errors.idBarbeiro.message}</p>}
-      </div>
+        </TextField>
 
-      <div>
-        <label htmlFor="agendamento-cliente">Cliente</label>
-        <select
+        <TextField
           id="agendamento-cliente"
+          label="Cliente"
+          select
+          slotProps={{ select: { native: true }, inputLabel: { shrink: true } }}
+          error={!!errors.idCliente}
+          helperText={errors.idCliente?.message}
           {...register('idCliente', { setValueAs: (value) => (value === '' ? undefined : Number(value)) })}
         >
           <option value="">Sem cliente</option>
@@ -54,31 +65,42 @@ export function AgendamentoForm({ isSubmitting, onSubmit }: AgendamentoFormProps
               {cliente.nome}
             </option>
           ))}
-        </select>
-        {errors.idCliente && <p role="alert">{errors.idCliente.message}</p>}
-      </div>
+        </TextField>
 
-      <div>
-        <label htmlFor="agendamento-data">Data</label>
-        <input id="agendamento-data" type="date" {...register('data')} />
-        {errors.data && <p role="alert">{errors.data.message}</p>}
-      </div>
+        <TextField
+          id="agendamento-data"
+          label="Data"
+          type="date"
+          slotProps={{ inputLabel: { shrink: true } }}
+          error={!!errors.data}
+          helperText={errors.data?.message}
+          {...register('data')}
+        />
 
-      <div>
-        <label htmlFor="agendamento-inicio">Hora de início</label>
-        <input id="agendamento-inicio" type="time" {...register('horaInicio')} />
-        {errors.horaInicio && <p role="alert">{errors.horaInicio.message}</p>}
-      </div>
+        <TextField
+          id="agendamento-inicio"
+          label="Hora de início"
+          type="time"
+          slotProps={{ inputLabel: { shrink: true } }}
+          error={!!errors.horaInicio}
+          helperText={errors.horaInicio?.message}
+          {...register('horaInicio')}
+        />
 
-      <div>
-        <label htmlFor="agendamento-fim">Hora de término</label>
-        <input id="agendamento-fim" type="time" {...register('horaFim')} />
-        {errors.horaFim && <p role="alert">{errors.horaFim.message}</p>}
-      </div>
+        <TextField
+          id="agendamento-fim"
+          label="Hora de término"
+          type="time"
+          slotProps={{ inputLabel: { shrink: true } }}
+          error={!!errors.horaFim}
+          helperText={errors.horaFim?.message}
+          {...register('horaFim')}
+        />
 
-      <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Salvando...' : 'Criar horário disponível'}
-      </button>
+        <Button type="submit" variant="contained" disabled={isSubmitting}>
+          {isSubmitting ? 'Salvando...' : 'Criar horário disponível'}
+        </Button>
+      </Stack>
     </form>
   )
 }

@@ -1,4 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import Button from '@mui/material/Button'
+import Stack from '@mui/material/Stack'
+import TextField from '@mui/material/TextField'
 import { useForm } from 'react-hook-form'
 import { clienteFormSchema, type ClienteFormValues } from '../schemas/clienteSchema'
 
@@ -28,39 +31,60 @@ export function ClienteForm({ defaultValues, isSubmitting, submitLabel, onSubmit
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      <div>
-        <label htmlFor="cliente-nome">Nome</label>
-        <input id="cliente-nome" type="text" autoComplete="name" {...register('nome')} />
-        {errors.nome && <p role="alert">{errors.nome.message}</p>}
-      </div>
+      <Stack spacing={2} sx={{ maxWidth: 420 }}>
+        <TextField
+          id="cliente-nome"
+          label="Nome"
+          type="text"
+          autoComplete="name"
+          error={!!errors.nome}
+          helperText={errors.nome?.message}
+          {...register('nome')}
+        />
 
-      <div>
-        <label htmlFor="cliente-email">E-mail</label>
-        <input id="cliente-email" type="email" autoComplete="email" {...register('email')} />
-        {errors.email && <p role="alert">{errors.email.message}</p>}
-      </div>
+        <TextField
+          id="cliente-email"
+          label="E-mail"
+          type="email"
+          autoComplete="email"
+          error={!!errors.email}
+          helperText={errors.email?.message}
+          {...register('email')}
+        />
 
-      <div>
-        <label htmlFor="cliente-telefone">Telefone</label>
-        <input id="cliente-telefone" type="tel" autoComplete="tel" {...register('telefone')} />
-        {errors.telefone && <p role="alert">{errors.telefone.message}</p>}
-      </div>
+        <TextField
+          id="cliente-telefone"
+          label="Telefone"
+          type="tel"
+          autoComplete="tel"
+          error={!!errors.telefone}
+          helperText={errors.telefone?.message}
+          {...register('telefone')}
+        />
 
-      <div>
-        <label htmlFor="cliente-instagram">Instagram</label>
-        <input id="cliente-instagram" type="text" {...register('instagram')} />
-        {errors.instagram && <p role="alert">{errors.instagram.message}</p>}
-      </div>
+        <TextField
+          id="cliente-instagram"
+          label="Instagram"
+          type="text"
+          error={!!errors.instagram}
+          helperText={errors.instagram?.message}
+          {...register('instagram')}
+        />
 
-      <div>
-        <label htmlFor="cliente-nascimento">Data de nascimento</label>
-        <input id="cliente-nascimento" type="date" {...register('dataNascimento')} />
-        {errors.dataNascimento && <p role="alert">{errors.dataNascimento.message}</p>}
-      </div>
+        <TextField
+          id="cliente-nascimento"
+          label="Data de nascimento"
+          type="date"
+          slotProps={{ inputLabel: { shrink: true } }}
+          error={!!errors.dataNascimento}
+          helperText={errors.dataNascimento?.message}
+          {...register('dataNascimento')}
+        />
 
-      <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Salvando...' : submitLabel}
-      </button>
+        <Button type="submit" variant="contained" disabled={isSubmitting}>
+          {isSubmitting ? 'Salvando...' : submitLabel}
+        </Button>
+      </Stack>
     </form>
   )
 }

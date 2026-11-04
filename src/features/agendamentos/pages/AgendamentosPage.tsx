@@ -1,4 +1,13 @@
 import { useMemo, useState } from 'react'
+import Alert from '@mui/material/Alert'
+import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
+import Divider from '@mui/material/Divider'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import ListItemText from '@mui/material/ListItemText'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import { HttpError } from '../../../lib/http/httpClient'
 import { useBarbeiros } from '../../barbeiros/hooks/useBarbeiros'
 import { useClientes } from '../../clientes/hooks/useClientes'
@@ -43,61 +52,85 @@ export function AgendamentosPage() {
   }
 
   return (
-    <section>
-      <h1>Agendamentos</h1>
-      <p>
-        Cada registro é um horário do barbeiro. Associe um cliente ao criar para reservar o horário,
-        ou deixe sem cliente para marcá-lo como disponível.
-      </p>
+    <Stack spacing={3}>
+      <Typography variant="h4" component="h1">
+        Agendamentos
+      </Typography>
+      <Typography color="text.secondary">
+        Cada registro é um horário do barbeiro. Associe um cliente ao criar para reservar o horário, ou deixe sem
+        cliente para marcá-lo como disponível.
+      </Typography>
 
-      <h2>Novo horário disponível</h2>
-      <AgendamentoForm isSubmitting={createMutation.isPending} onSubmit={handleCreate} />
-      {createMutation.isError && <p role="alert">{errorMessage(createMutation.error)}</p>}
+      <Stack spacing={2}>
+        <Typography variant="h6" component="h2">
+          Novo horário disponível
+        </Typography>
+        <AgendamentoForm isSubmitting={createMutation.isPending} onSubmit={handleCreate} />
+        {createMutation.isError && <Alert severity="error">{errorMessage(createMutation.error)}</Alert>}
+      </Stack>
 
-      <h2>Agenda dos barbeiros</h2>
-      {!isLoading && !isError && (
-        <AgendamentosCalendar
-          agendamentos={agendamentos ?? []}
-          barbeiros={barbeiros ?? []}
-          selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
-        />
-      )}
+      <Stack spacing={1}>
+        <Typography variant="h6" component="h2">
+          Agenda dos barbeiros
+        </Typography>
+        {!isLoading && !isError && (
+          <AgendamentosCalendar
+            agendamentos={agendamentos ?? []}
+            barbeiros={barbeiros ?? []}
+            selectedDate={selectedDate}
+            onSelectDate={setSelectedDate}
+          />
+        )}
+      </Stack>
 
-      <h2>Lista de horários</h2>
-      {isLoading && <p>Carregando agendamentos...</p>}
-      {isError && <p role="alert">{errorMessage(error)}</p>}
-      {selectedDate && (
-        <p>
-          Filtrando por {selectedDate}.{' '}
-          <button type="button" onClick={() => setSelectedDate(null)}>
-            Limpar filtro
-          </button>
-        </p>
-      )}
-      {!isLoading && !isError && agendamentosExibidos?.length === 0 && (
-        <p>{selectedDate ? 'Nenhum horário cadastrado para esta data.' : 'Nenhum horário cadastrado.'}</p>
-      )}
+      <Stack spacing={1}>
+        <Typography variant="h6" component="h2">
+          Lista de horários
+        </Typography>
+        {isLoading && <Typography>Carregando agendamentos...</Typography>}
+        {isError && <Alert severity="error">{errorMessage(error)}</Alert>}
+        {selectedDate && (
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <Typography>Filtrando por {selectedDate}.</Typography>
+            <Chip label="Limpar filtro" size="small" onClick={() => setSelectedDate(null)} />
+          </Stack>
+        )}
+        {!isLoading && !isError && agendamentosExibidos?.length === 0 && (
+          <Typography>{selectedDate ? 'Nenhum horário cadastrado para esta data.' : 'Nenhum horário cadastrado.'}</Typography>
+        )}
 
-      {agendamentosExibidos && agendamentosExibidos.length > 0 && (
-        <ul>
-          {agendamentosExibidos.map((agendamento) => (
-            <li key={agendamento.id}>
-              <span>
-                {nomeBarbeiro(agendamento.idBarbeiro)} — {agendamento.data} {agendamento.horaInicio}–
-                {agendamento.horaFim} —{' '}
-                {agendamento.disponivel
-                  ? 'Disponível'
-                  : `Reservado (${nomeCliente(agendamento.idCliente as number)})`}
-              </span>
-              <button type="button" onClick={() => handleDelete(agendamento.id)} disabled={deleteMutation.isPending}>
-                Excluir
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      {deleteMutation.isError && <p role="alert">{errorMessage(deleteMutation.error)}</p>}
-    </section>
+        {agendamentosExibidos && agendamentosExibidos.length > 0 && (
+          <List disablePadding>
+            {agendamentosExibidos.map((agendamento, index) => (
+              <div key={agendamento.id}>
+                {index > 0 && <Divider component="li" />}
+                <ListItem
+                  secondaryAction={
+                    <Button
+                      size="small"
+                      color="error"
+                      onClick={() => handleDelete(agendamento.id)}
+                      disabled={deleteMutation.isPending}
+                    >
+                      Excluir
+                    </Button>
+                  }
+                >
+                  <ListItemText
+                    primary={`${nomeBarbeiro(agendamento.idBarbeiro)} — ${agendamento.data} ${agendamento.horaInicio}–${agendamento.horaFim}`}
+                    secondary={
+                      agendamento.disponivel
+                        ? 'Disponível'
+                        : `Reservado (${nomeCliente(agendamento.idCliente as number)})`
+                    }
+                  />
+                </ListItem>
+              </div>
+            ))}
+          </List>
+        )}
+        {deleteMutation.isError && <Alert severity="error">{errorMessage(deleteMutation.error)}</Alert>}
+      </Stack>
+    </Stack>
   )
 }

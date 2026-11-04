@@ -1,4 +1,15 @@
 import { useMemo, useState } from 'react'
+import Box from '@mui/material/Box'
+import IconButton from '@mui/material/IconButton'
+import Stack from '@mui/material/Stack'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableHead from '@mui/material/TableHead'
+import TableRow from '@mui/material/TableRow'
+import Typography from '@mui/material/Typography'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import type { Barbeiro } from '../../barbeiros/types'
 import type { Agendamento } from '../types'
 
@@ -64,67 +75,83 @@ export function AgendamentosCalendar({
   }
 
   return (
-    <div>
-      <div>
-        <button type="button" onClick={irParaMesAnterior} aria-label="Mês anterior">
-          Anterior
-        </button>
-        <span aria-live="polite" style={{ margin: '0 0.5rem', textTransform: 'capitalize' }}>
+    <Box>
+      <Stack direction="row" spacing={1} sx={{ mb: 1, alignItems: 'center' }}>
+        <IconButton onClick={irParaMesAnterior} aria-label="Mês anterior" size="small">
+          <ChevronLeftIcon />
+        </IconButton>
+        <Typography aria-live="polite" sx={{ textTransform: 'capitalize', minWidth: 160, textAlign: 'center' }}>
           {nomeMes}
-        </span>
-        <button type="button" onClick={irParaProximoMes} aria-label="Próximo mês">
-          Próximo
-        </button>
-      </div>
+        </Typography>
+        <IconButton onClick={irParaProximoMes} aria-label="Próximo mês" size="small">
+          <ChevronRightIcon />
+        </IconButton>
+      </Stack>
 
-      <table>
+      <Table size="small">
         <caption className="sr-only">Agenda dos barbeiros em {nomeMes}</caption>
-        <thead>
-          <tr>
+        <TableHead>
+          <TableRow>
             {DIAS_SEMANA.map((dia) => (
-              <th key={dia} scope="col">
+              <TableCell key={dia} align="center">
                 {dia}
-              </th>
+              </TableCell>
             ))}
-          </tr>
-        </thead>
-        <tbody>
+          </TableRow>
+        </TableHead>
+        <TableBody>
           {Array.from({ length: Math.ceil(celulas.length / 7) }, (_, semana) => (
-            <tr key={semana}>
+            <TableRow key={semana}>
               {celulas.slice(semana * 7, semana * 7 + 7).map((celula, indice) => {
                 if (!celula) {
-                  return <td key={indice} />
+                  return <TableCell key={indice} />
                 }
 
                 const agendamentosDoDia = agendamentosPorData.get(celula.data) ?? []
                 const isSelecionado = selectedDate === celula.data
 
                 return (
-                  <td key={celula.data}>
-                    <button
+                  <TableCell key={celula.data} align="center" sx={{ verticalAlign: 'top', p: 0.5 }}>
+                    <Box
+                      component="button"
                       type="button"
                       aria-pressed={isSelecionado}
                       onClick={() => onSelectDate(isSelecionado ? null : celula.data)}
+                      sx={{
+                        width: '100%',
+                        border: 'none',
+                        borderRadius: 1,
+                        cursor: 'pointer',
+                        bgcolor: isSelecionado ? 'secondary.light' : 'transparent',
+                        p: 0.5,
+                        font: 'inherit',
+                      }}
                     >
-                      <span>{celula.dia}</span>
+                      <Typography component="span" variant="body2">
+                        {celula.dia}
+                      </Typography>
                       {agendamentosDoDia.length > 0 && (
-                        <ul aria-label={`${agendamentosDoDia.length} horário(s) em ${celula.data}`}>
+                        <Box
+                          component="ul"
+                          aria-label={`${agendamentosDoDia.length} horário(s) em ${celula.data}`}
+                          sx={{ listStyle: 'none', m: 0, p: 0, fontSize: '0.7rem', textAlign: 'left' }}
+                        >
                           {agendamentosDoDia.slice(0, 3).map((agendamento) => (
                             <li key={agendamento.id}>
                               {nomeBarbeiro(barbeiros, agendamento.idBarbeiro)} {agendamento.horaInicio}
                             </li>
                           ))}
                           {agendamentosDoDia.length > 3 && <li>+{agendamentosDoDia.length - 3}</li>}
-                        </ul>
+                        </Box>
                       )}
-                    </button>
-                  </td>
+                    </Box>
+                  </TableCell>
                 )
               })}
-            </tr>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </TableBody>
+      </Table>
+    </Box>
   )
 }

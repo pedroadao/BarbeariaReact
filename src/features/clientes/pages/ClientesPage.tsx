@@ -1,4 +1,12 @@
 import { useState } from 'react'
+import Alert from '@mui/material/Alert'
+import Button from '@mui/material/Button'
+import Divider from '@mui/material/Divider'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import ListItemText from '@mui/material/ListItemText'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import { HttpError } from '../../../lib/http/httpClient'
 import { ClienteForm } from '../components/ClienteForm'
 import {
@@ -47,44 +55,69 @@ export function ClientesPage() {
   }
 
   return (
-    <section>
-      <h1>Clientes</h1>
+    <Stack spacing={3}>
+      <Typography variant="h4" component="h1">
+        Clientes
+      </Typography>
 
-      <h2>{editing ? `Editar cliente #${editing.id}` : 'Novo cliente'}</h2>
-      <ClienteForm
-        key={editing?.id ?? 'new'}
-        defaultValues={editing ? { ...editing, instagram: editing.instagram ?? '' } : undefined}
-        isSubmitting={editing ? updateMutation.isPending : createMutation.isPending}
-        submitLabel={editing ? 'Salvar alterações' : 'Cadastrar cliente'}
-        onSubmit={editing ? handleUpdate : handleCreate}
-      />
-      {editing && <button type="button" onClick={() => setEditing(null)}>Cancelar edição</button>}
-      {createMutation.isError && <p role="alert">{errorMessage(createMutation.error)}</p>}
-      {updateMutation.isError && <p role="alert">{errorMessage(updateMutation.error)}</p>}
+      <Stack spacing={2}>
+        <Typography variant="h6" component="h2">
+          {editing ? `Editar cliente #${editing.id}` : 'Novo cliente'}
+        </Typography>
+        <ClienteForm
+          key={editing?.id ?? 'new'}
+          defaultValues={editing ? { ...editing, instagram: editing.instagram ?? '' } : undefined}
+          isSubmitting={editing ? updateMutation.isPending : createMutation.isPending}
+          submitLabel={editing ? 'Salvar alterações' : 'Cadastrar cliente'}
+          onSubmit={editing ? handleUpdate : handleCreate}
+        />
+        {editing && (
+          <Button type="button" onClick={() => setEditing(null)} sx={{ alignSelf: 'flex-start' }}>
+            Cancelar edição
+          </Button>
+        )}
+        {createMutation.isError && <Alert severity="error">{errorMessage(createMutation.error)}</Alert>}
+        {updateMutation.isError && <Alert severity="error">{errorMessage(updateMutation.error)}</Alert>}
+      </Stack>
 
-      <h2>Lista de clientes</h2>
-      {isLoading && <p>Carregando clientes...</p>}
-      {isError && <p role="alert">{errorMessage(error)}</p>}
-      {!isLoading && !isError && clientes?.length === 0 && <p>Nenhum cliente cadastrado.</p>}
+      <Stack spacing={1}>
+        <Typography variant="h6" component="h2">
+          Lista de clientes
+        </Typography>
+        {isLoading && <Typography>Carregando clientes...</Typography>}
+        {isError && <Alert severity="error">{errorMessage(error)}</Alert>}
+        {!isLoading && !isError && clientes?.length === 0 && <Typography>Nenhum cliente cadastrado.</Typography>}
 
-      {clientes && clientes.length > 0 && (
-        <ul>
-          {clientes.map((cliente) => (
-            <li key={cliente.id}>
-              <span>
-                {cliente.nome} — {cliente.email} — {cliente.telefone}
-              </span>
-              <button type="button" onClick={() => setEditing(cliente)}>
-                Editar
-              </button>
-              <button type="button" onClick={() => handleDelete(cliente.id)} disabled={deleteMutation.isPending}>
-                Excluir
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      {deleteMutation.isError && <p role="alert">{errorMessage(deleteMutation.error)}</p>}
-    </section>
+        {clientes && clientes.length > 0 && (
+          <List disablePadding>
+            {clientes.map((cliente, index) => (
+              <div key={cliente.id}>
+                {index > 0 && <Divider component="li" />}
+                <ListItem
+                  secondaryAction={
+                    <Stack direction="row" spacing={1}>
+                      <Button size="small" onClick={() => setEditing(cliente)}>
+                        Editar
+                      </Button>
+                      <Button
+                        size="small"
+                        color="error"
+                        onClick={() => handleDelete(cliente.id)}
+                        disabled={deleteMutation.isPending}
+                      >
+                        Excluir
+                      </Button>
+                    </Stack>
+                  }
+                >
+                  <ListItemText primary={`${cliente.nome} — ${cliente.email} — ${cliente.telefone}`} />
+                </ListItem>
+              </div>
+            ))}
+          </List>
+        )}
+        {deleteMutation.isError && <Alert severity="error">{errorMessage(deleteMutation.error)}</Alert>}
+      </Stack>
+    </Stack>
   )
 }
