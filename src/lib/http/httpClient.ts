@@ -1,6 +1,14 @@
 import { env } from '../../config/env'
 
-export type HttpErrorKind = 'validation' | 'notFound' | 'conflict' | 'server' | 'network' | 'unknown'
+export type HttpErrorKind =
+  | 'validation'
+  | 'unauthorized'
+  | 'forbidden'
+  | 'notFound'
+  | 'conflict'
+  | 'server'
+  | 'network'
+  | 'unknown'
 
 export class HttpError extends Error {
   readonly kind: HttpErrorKind
@@ -18,6 +26,8 @@ export class HttpError extends Error {
 
 function kindFromStatus(status: number): HttpErrorKind {
   if (status === 400 || status === 422) return 'validation'
+  if (status === 401) return 'unauthorized'
+  if (status === 403) return 'forbidden'
   if (status === 404) return 'notFound'
   if (status === 409) return 'conflict'
   if (status >= 500) return 'server'
@@ -50,6 +60,10 @@ function defaultMessageFor(kind: HttpErrorKind): string {
   switch (kind) {
     case 'validation':
       return 'Os dados enviados são inválidos.'
+    case 'unauthorized':
+      return 'Sessão inválida ou expirada.'
+    case 'forbidden':
+      return 'Você não tem permissão para acessar este recurso.'
     case 'notFound':
       return 'Recurso não encontrado.'
     case 'conflict':
@@ -68,14 +82,32 @@ export interface RequestOptions {
   signal?: AbortSignal
 }
 
+/**
+ * Fornece o access token OIDC (emitido pelo Authentication) a ser anexado nas
+ * chamadas à API da Barbearia, que agora exige Bearer token nos endpoints.
+ * Definido pelo AuthProvider; evita que cada chamada de API precise conhecer
+ * o estado de autenticação diretamente.
+ */
+let accessTokenProvider: (() => Promise<string | null>) | null = null
+
+export function setAccessTokenProvider(provider: (() => Promise<string | null>) | null): void {
+  accessTokenProvider = provider
+}
+
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const url = `${env.VITE_API_BASE_URL}${path}`
+  const headers = { ...options.headers }
+
+  if (!headers.Authorization && accessTokenProvider) {
+    const accessToken = await accessTokenProvider()
+    if (accessToken) headers.Authorization = `Bearer ${accessToken}`
+  }
 
   let response: Response
   try {
     response = await fetch(url, {
       method: options.method ?? 'GET',
-      headers: options.headers,
+      headers,
       body: options.body,
       signal: options.signal,
     })

@@ -1,10 +1,12 @@
 import AppBar from '@mui/material/AppBar'
+import Button from '@mui/material/Button'
 import Container from '@mui/material/Container'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
-import { Link, Outlet, useLocation } from 'react-router-dom'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../lib/auth/useAuth'
 
 const NAV_ITEMS = [
   { to: '/barbeiros', label: 'Barbeiros' },
@@ -14,7 +16,14 @@ const NAV_ITEMS = [
 
 export function AppLayout() {
   const { pathname } = useLocation()
+  const { logout } = useAuth()
+  const navigate = useNavigate()
   const currentTab = NAV_ITEMS.some((item) => item.to === pathname) ? pathname : NAV_ITEMS[0].to
+
+  function handleLogout() {
+    logout()
+    navigate('/login', { replace: true })
+  }
 
   return (
     <div>
@@ -23,6 +32,9 @@ export function AppLayout() {
           <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }}>
             Barbearia
           </Typography>
+          <Button color="inherit" onClick={handleLogout}>
+            Sair
+          </Button>
         </Toolbar>
         <Tabs value={currentTab} textColor="inherit" indicatorColor="secondary">
           {NAV_ITEMS.map((item) => (

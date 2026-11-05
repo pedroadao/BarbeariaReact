@@ -1,0 +1,85 @@
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { AuthProvider } from '../../../lib/auth/AuthContext'
+import * as authApi from '../api/authApi'
+import { LoginPage } from './LoginPage'
+
+vi.mock('../api/authApi')
+
+function renderLoginPage() {
+  const queryClient = new QueryClient()
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={['/login']}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/barbeiros" element={<div>Página de barbeiros</div>} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  )
+}
+
+describe('LoginPage', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+    vi.mocked(authApi.startAuthorize).mockResolvedValue(undefined)
+  })
+
+  it('exibe mensagens de validação quando os campos estão vazios', async () => {
+    const user = userEvent.setup()
+    renderLoginPage()
+
+    await user.click(screen.getByRole('button', { name: 'Entrar' }))
+
+    expect(await screen.findByText('Informe o e-mail.')).toBeInTheDocument()
+    expect(screen.getByText('Informe a senha.')).toBeInTheDocument()
+    expect(authApi.login).not.toHaveBeenCalled()
+  })
+
+  it('autentica a sessão por cookie e inicia o Authorization Code + PKCE', async () => {
+    vi.mocked(authApi.login).mockResolvedValue({ succeeded: true })
+    const user = userEvent.setup()
+    renderLoginPage()
+
+    await user.type(screen.getByLabelText('E-mail'), 'barbeiro@barbearia.com')
+    await user.type(screen.getByLabelText('Senha'), 'senha123')
+    await user.click(screen.getByRole('button', { name: 'Entrar' }))
+
+    await waitFor(() => expect(authApi.startAuthorize).toHaveBeenCalledWith('/barbeiros'))
+    expect(authApi.login).toHaveBeenCalledWith({ email: 'barbeiro@barbearia.com', senha: 'senha123' })
+  })
+
+  it('exibe mensagem de erro quando a autenticação falha', async () => {
+    const { HttpError } = await import('../../../lib/http/httpClient')
+    vi.mocked(authApi.login).mockRejectedValue(
+      new HttpError('unauthorized', 'E-mail ou senha inválidos.', 401, null),
+    )
+    const user = userEvent.setup()
+    renderLoginPage()
+
+    await user.type(screen.getByLabelText('E-mail'), 'barbeiro@barbearia.com')
+    await user.type(screen.getByLabelText('Senha'), 'senha-errada')
+    await user.click(screen.getByRole('button', { name: 'Entrar' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('E-mail ou senha inválidos.')
+    expect(authApi.startAuthorize).not.toHaveBeenCalled()
+  })
+
+  it('alterna a visibilidade da senha', async () => {
+    const user = userEvent.setup()
+    renderLoginPage()
+
+    const senhaInput = screen.getByLabelText('Senha')
+    expect(senhaInput).toHaveAttribute('type', 'password')
+
+    await user.click(screen.getByRole('button', { name: 'Mostrar senha' }))
+    expect(senhaInput).toHaveAttribute('type', 'text')
+  })
+})

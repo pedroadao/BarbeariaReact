@@ -2,6 +2,10 @@ import { z } from 'zod'
 
 const envSchema = z.object({
   VITE_API_BASE_URL: z.string().url(),
+  VITE_AUTH_BASE_URL: z.string().url(),
+  VITE_OIDC_CLIENT_ID: z.string().min(1),
+  VITE_OIDC_REDIRECT_URI: z.string().url(),
+  VITE_OIDC_SCOPE: z.string().min(1),
 })
 
 function loadEnv() {
