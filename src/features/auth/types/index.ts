@@ -3,6 +3,12 @@ export interface LoginInput {
   senha: string
 }
 
+export interface RegisterInput {
+  email: string
+  nome: string
+  senha: string
+}
+
 export interface Me {
   id: string
   email: string

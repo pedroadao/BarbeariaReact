@@ -5,6 +5,7 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
+import Link from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
@@ -12,7 +13,7 @@ import Typography from '@mui/material/Typography'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import { useForm } from 'react-hook-form'
-import { useLocation } from 'react-router-dom'
+import { Link as RouterLink, useLocation } from 'react-router-dom'
 import { HttpError } from '../../../lib/http/httpClient'
 import { useAuth } from '../../../lib/auth/useAuth'
 import { loginFormSchema, type LoginFormValues } from '../schemas/loginSchema'
@@ -37,6 +38,8 @@ export function LoginPage() {
     resolver: zodResolver(loginFormSchema),
     defaultValues: { email: '', senha: '' },
   })
+
+  const registered = (location.state as { registered?: boolean } | null)?.registered ?? false
 
   async function submit(values: LoginFormValues) {
     setSubmitError(null)
@@ -109,11 +112,16 @@ export function LoginPage() {
             }}
           />
 
+          {registered && <Alert severity="success">Conta criada com sucesso. Entre com suas credenciais.</Alert>}
           {submitError && <Alert severity="error">{submitError}</Alert>}
 
           <Button type="submit" variant="contained" disabled={isSubmitting}>
             {isSubmitting ? 'Entrando...' : 'Entrar'}
           </Button>
+
+          <Link component={RouterLink} to="/registrar" variant="body2" sx={{ alignSelf: 'center' }}>
+            Não tem uma conta? Criar conta
+          </Link>
         </Stack>
       </Paper>
     </Box>

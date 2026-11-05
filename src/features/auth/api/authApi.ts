@@ -1,7 +1,7 @@
 import { env } from '../../../config/env'
 import { HttpError, type HttpErrorKind } from '../../../lib/http/httpClient'
 import { createPkceChallenge, savePkceState } from '../../../lib/auth/pkce'
-import type { LoginInput, Me, TokenResponse } from '../types'
+import type { LoginInput, Me, RegisterInput, TokenResponse } from '../types'
 
 function kindFromStatus(status: number): HttpErrorKind {
   if (status === 401) return 'unauthorized'
@@ -99,6 +99,22 @@ export function login(input: LoginInput): Promise<{ succeeded: true }> {
       'X-Requested-With': 'XMLHttpRequest',
     },
     body,
+  })
+}
+
+/**
+ * Cria a conta no Authentication (POST /api/accounts/register, confirmado via
+ * Swagger). Não autentica — após o cadastro o usuário ainda precisa fazer login.
+ */
+export function register(input: RegisterInput): Promise<void> {
+  return authRequest<void>('/api/accounts/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: input.email,
+      displayName: input.nome,
+      password: input.senha,
+    }),
   })
 }
 

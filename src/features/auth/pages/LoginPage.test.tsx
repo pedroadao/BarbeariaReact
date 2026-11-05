@@ -19,6 +19,7 @@ function renderLoginPage() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/barbeiros" element={<div>Página de barbeiros</div>} />
+            <Route path="/registrar" element={<div>Página de cadastro</div>} />
           </Routes>
         </AuthProvider>
       </MemoryRouter>
@@ -81,5 +82,14 @@ describe('LoginPage', () => {
 
     await user.click(screen.getByRole('button', { name: 'Mostrar senha' }))
     expect(senhaInput).toHaveAttribute('type', 'text')
+  })
+
+  it('navega para a tela de cadastro ao clicar em "Criar conta"', async () => {
+    const user = userEvent.setup()
+    renderLoginPage()
+
+    await user.click(screen.getByRole('link', { name: 'Não tem uma conta? Criar conta' }))
+
+    expect(await screen.findByText('Página de cadastro')).toBeInTheDocument()
   })
 })

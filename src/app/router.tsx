@@ -4,6 +4,7 @@ import { AgendamentosPage } from '../features/agendamentos/pages/AgendamentosPag
 import { AccessDeniedPage } from '../features/auth/pages/AccessDeniedPage'
 import { CallbackPage } from '../features/auth/pages/CallbackPage'
 import { LoginPage } from '../features/auth/pages/LoginPage'
+import { RegisterPage } from '../features/auth/pages/RegisterPage'
 import { BarbeirosPage } from '../features/barbeiros/pages/BarbeirosPage'
 import { ClientesPage } from '../features/clientes/pages/ClientesPage'
 import { ProtectedRoute } from '../routes/ProtectedRoute'
@@ -14,6 +15,7 @@ export function AppRouter() {
     <Routes>
       <Route element={<PublicRoute />}>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/registrar" element={<RegisterPage />} />
       </Route>
       <Route path="/callback" element={<CallbackPage />} />
       <Route path="/acesso-negado" element={<AccessDeniedPage />} />
