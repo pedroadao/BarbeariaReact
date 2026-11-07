@@ -12,7 +12,7 @@ const barbeiro: Barbeiro = {
   id: 1,
   nome: 'João Barbeiro',
   email: 'joao@barbearia.com',
-  telefone: '11999990000',
+  telefone: '+55 (11) 99999-0000',
   instagram: null,
   dataNascimento: '1990-01-01',
   idTipoUsuario: 1,

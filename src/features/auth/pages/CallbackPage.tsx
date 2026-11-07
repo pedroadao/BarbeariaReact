@@ -8,11 +8,14 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../../lib/auth/useAuth'
+import { HttpError } from '../../../lib/http/httpClient'
+import { getMeCliente } from '../../clientes/api/clientesApi'
 
 export function CallbackPage() {
   const [searchParams] = useSearchParams()
   const { completeCallback } = useAuth()
   const [destination, setDestination] = useState<string | null>(null)
+  const [cadastroReturnTo, setCadastroReturnTo] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const ranOnce = useRef(false)
 
@@ -35,9 +38,31 @@ export function CallbackPage() {
     }
 
     completeCallback(code, state)
-      .then((returnTo) => setDestination(returnTo))
+      .then(async (returnTo) => {
+        try {
+          const cliente = await getMeCliente()
+          const dadosEssenciaisPreenchidos = Boolean(cliente.telefone) || Boolean(cliente.dataNascimento)
+          if (cliente.mostrarCadastroSempre && !dadosEssenciaisPreenchidos) {
+            setCadastroReturnTo(returnTo)
+            setDestination('/completar-cadastro')
+          } else {
+            setDestination(returnTo)
+          }
+        } catch (clienteError) {
+          if (clienteError instanceof HttpError && clienteError.kind === 'notFound') {
+            setCadastroReturnTo(returnTo)
+            setDestination('/completar-cadastro')
+          } else {
+            setDestination(returnTo)
+          }
+        }
+      })
       .catch(() => setError('Não foi possível concluir o login. Tente novamente.'))
   }, [searchParams, completeCallback])
+
+  if (destination === '/completar-cadastro') {
+    return <Navigate to={destination} replace state={{ returnTo: cadastroReturnTo ?? '/agendamentos' }} />
+  }
 
   if (destination) return <Navigate to={destination} replace />
 

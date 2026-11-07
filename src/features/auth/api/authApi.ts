@@ -26,6 +26,7 @@ function messageFromBody(body: unknown, kind: HttpErrorKind): string {
   if (typeof body === 'object' && body !== null) {
     const record = body as Record<string, unknown>
     if (typeof record.error === 'string') return record.error
+    if (typeof record.detail === 'string') return record.detail
     if (typeof record.title === 'string') return record.title
   }
 
@@ -49,10 +50,6 @@ interface AuthRequestOptions {
   body?: BodyInit
 }
 
-/**
- * Chamadas ao projeto Authentication (cookie de sessão + endpoints OpenIddict
- * /connect/*), em uma base de URL diferente da API de negócio da Barbearia.
- */
 async function authRequest<T>(path: string, options: AuthRequestOptions = {}): Promise<T> {
   const url = `${env.VITE_AUTH_BASE_URL}${path}`
 
@@ -78,12 +75,6 @@ async function authRequest<T>(path: string, options: AuthRequestOptions = {}): P
   return body as T
 }
 
-/**
- * Autentica a sessão por cookie no Authentication (mesmo endpoint usado pelo
- * fluxo OAuth server-rendered, pedindo resposta JSON). O access token em si só
- * é obtido depois, completando o Authorization Code + PKCE em startAuthorize —
- * ver nota na raiz sobre a decisão de arquitetura (frontend conduz o PKCE).
- */
 export function login(input: LoginInput): Promise<{ succeeded: true }> {
   const body = new URLSearchParams({
     email: input.email,
@@ -102,10 +93,6 @@ export function login(input: LoginInput): Promise<{ succeeded: true }> {
   })
 }
 
-/**
- * Cria a conta no Authentication (POST /api/accounts/register, confirmado via
- * Swagger). Não autentica — após o cadastro o usuário ainda precisa fazer login.
- */
 export function register(input: RegisterInput): Promise<void> {
   return authRequest<void>('/api/accounts/register', {
     method: 'POST',
@@ -118,7 +105,6 @@ export function register(input: RegisterInput): Promise<void> {
   })
 }
 
-/** Inicia o fluxo Authorization Code + PKCE navegando para /connect/authorize. */
 export async function startAuthorize(returnTo: string): Promise<void> {
   const { codeVerifier, codeChallenge, state } = await createPkceChallenge()
   savePkceState({ codeVerifier, state, returnTo })
@@ -172,7 +158,6 @@ export function fetchMe(accessToken: string): Promise<Me> {
   })
 }
 
-/** Logout é uma navegação completa (end-session do OpenIddict), não uma chamada JSON. */
 export function logoutRedirect(): void {
   window.location.href = `${env.VITE_AUTH_BASE_URL}/connect/logout`
 }

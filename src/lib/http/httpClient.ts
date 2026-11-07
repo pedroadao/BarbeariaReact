@@ -82,12 +82,6 @@ export interface RequestOptions {
   signal?: AbortSignal
 }
 
-/**
- * Fornece o access token OIDC (emitido pelo Authentication) a ser anexado nas
- * chamadas à API da Barbearia, que agora exige Bearer token nos endpoints.
- * Definido pelo AuthProvider; evita que cada chamada de API precise conhecer
- * o estado de autenticação diretamente.
- */
 let accessTokenProvider: (() => Promise<string | null>) | null = null
 
 export function setAccessTokenProvider(provider: (() => Promise<string | null>) | null): void {

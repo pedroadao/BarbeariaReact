@@ -9,6 +9,10 @@ export function getCliente(id: number, signal?: AbortSignal): Promise<Cliente> {
   return request<Cliente>(`/clientes/${id}`, { signal })
 }
 
+export function getMeCliente(signal?: AbortSignal): Promise<Cliente> {
+  return request<Cliente>('/clientes/me', { signal })
+}
+
 export function createCliente(input: CreateClienteInput): Promise<Cliente> {
   return request<Cliente>('/clientes', {
     method: 'POST',

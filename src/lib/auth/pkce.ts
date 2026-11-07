@@ -32,11 +32,6 @@ export async function createPkceChallenge() {
   return { codeVerifier, codeChallenge, state }
 }
 
-/**
- * code_verifier e state são parâmetros transitórios do protocolo OAuth, não
- * tokens: precisam sobreviver à navegação completa até /connect/authorize e
- * de volta, por isso usamos sessionStorage em vez de memória.
- */
 export function savePkceState(state: PkceState): void {
   sessionStorage.setItem(PKCE_STORAGE_KEY, JSON.stringify(state))
 }

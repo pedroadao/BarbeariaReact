@@ -44,7 +44,12 @@ export function ClientesPage() {
     updateMutation.mutate(
       {
         id: editing.id,
-        input: { ...values, idTipoUsuario: editing.idTipoUsuario, instagram: values.instagram || null },
+        input: {
+          ...values,
+          idTipoUsuario: editing.idTipoUsuario,
+          instagram: values.instagram || null,
+          mostrarCadastroSempre: editing.mostrarCadastroSempre,
+        },
       },
       { onSuccess: () => setEditing(null) },
     )

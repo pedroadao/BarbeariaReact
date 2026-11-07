@@ -1,0 +1,19 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # As APIs (Barbearia e Authentication) devem estar rodando separadamente
+        # (ver ../Barbearia/docker-compose.yml e ../Authentication/docker-compose.yml).
+        # O fluxo OAuth é navegação completa do browser do host, não
+        # container-para-container, por isso localhost e não nome de serviço Docker.
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8081}
+        VITE_AUTH_BASE_URL: ${VITE_AUTH_BASE_URL:-https://localhost:8443}
+        VITE_OIDC_CLIENT_ID: ${VITE_OIDC_CLIENT_ID:-barbearia-spa-client}
+        VITE_OIDC_REDIRECT_URI: ${VITE_OIDC_REDIRECT_URI:-http://localhost:8082/callback}
+        VITE_OIDC_SCOPE: ${VITE_OIDC_SCOPE:-openid email profile offline_access}
+    container_name: barbearia-web-1
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8082}:80"

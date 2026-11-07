@@ -12,10 +12,11 @@ const cliente: Cliente = {
   id: 1,
   nome: 'Maria Cliente',
   email: 'maria@cliente.com',
-  telefone: '11988880000',
+  telefone: '+55 (11) 98888-0000',
   instagram: null,
   dataNascimento: '1992-02-02',
   idTipoUsuario: 2,
+  mostrarCadastroSempre: true,
 }
 
 function renderPage() {

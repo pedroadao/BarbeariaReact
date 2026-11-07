@@ -1,8 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import Button from '@mui/material/Button'
+import InputAdornment from '@mui/material/InputAdornment'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import { useForm } from 'react-hook-form'
+import { PhoneField } from '../../../components/form/PhoneField'
 import { barbeiroFormSchema, type BarbeiroFormValues } from '../schemas/barbeiroSchema'
 
 interface BarbeiroFormProps {
@@ -15,6 +17,7 @@ interface BarbeiroFormProps {
 export function BarbeiroForm({ defaultValues, isSubmitting, submitLabel, onSubmit }: BarbeiroFormProps) {
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<BarbeiroFormValues>({
@@ -52,15 +55,7 @@ export function BarbeiroForm({ defaultValues, isSubmitting, submitLabel, onSubmi
           {...register('email')}
         />
 
-        <TextField
-          id="barbeiro-telefone"
-          label="Telefone"
-          type="tel"
-          autoComplete="tel"
-          error={!!errors.telefone}
-          helperText={errors.telefone?.message}
-          {...register('telefone')}
-        />
+        <PhoneField control={control} name="telefone" idPrefix="barbeiro" error={errors.telefone?.message} />
 
         <TextField
           id="barbeiro-instagram"
@@ -68,7 +63,12 @@ export function BarbeiroForm({ defaultValues, isSubmitting, submitLabel, onSubmi
           type="text"
           error={!!errors.instagram}
           helperText={errors.instagram?.message}
-          {...register('instagram')}
+          slotProps={{ input: { startAdornment: <InputAdornment position="start">@</InputAdornment> } }}
+          {...register('instagram', {
+            onChange: (event) => {
+              event.target.value = event.target.value.replace(/^@+/, '')
+            },
+          })}
         />
 
         <TextField

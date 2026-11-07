@@ -4,7 +4,6 @@ import {
   exchangeCodeForToken,
   fetchMe,
   login as loginRequest,
-  logoutRedirect,
   refreshAccessToken,
   startAuthorize,
 } from '../../features/auth/api/authApi'
@@ -12,6 +11,7 @@ import type { LoginInput } from '../../features/auth/types'
 import { consumePkceState } from './pkce'
 import { HttpError, setAccessTokenProvider } from '../http/httpClient'
 import { AuthContext, type AuthContextValue } from './authContextValue'
+import { trySilentLogin } from './silentRenew'
 
 interface Tokens {
   accessToken: string
@@ -21,15 +21,8 @@ interface Tokens {
 
 const EXPIRY_SAFETY_MARGIN_MS = 10_000
 
-/**
- * Tokens ficam apenas em memória (nunca em localStorage/sessionStorage) para
- * reduzir o risco de exposição via XSS: uma atualização completa da página
- * exige nova autenticação. Apenas o code_verifier/state do PKCE (não um
- * token) usam sessionStorage, por precisarem sobreviver à navegação completa
- * até /connect/authorize e de volta — ver lib/auth/pkce.ts.
- */
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [status, setStatus] = useState<AuthContextValue['status']>('unauthenticated')
+  const [status, setStatus] = useState<AuthContextValue['status']>('loading')
   const [user, setUser] = useState<AuthContextValue['user']>(null)
   const tokensRef = useRef<Tokens | null>(null)
   const refreshInFlightRef = useRef<Promise<string | null> | null>(null)
@@ -67,7 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
     setStatus('unauthenticated')
     queryClient.clear()
-    logoutRedirect()
   }, [queryClient])
 
   const refreshTokens = useCallback(async (): Promise<string | null> => {
@@ -118,6 +110,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAccessTokenProvider(getAccessToken)
     return () => setAccessTokenProvider(null)
   }, [getAccessToken])
+
+  useEffect(() => {
+    const path = window.location.pathname
+    if (path === '/callback' || path === '/silent-callback') {
+      setStatus((current) => (current === 'loading' ? 'unauthenticated' : current))
+      return
+    }
+
+    const cancelledRef = { current: false }
+
+    trySilentLogin().then((result) => {
+      if (cancelledRef.current) return
+
+      if (!result) {
+        setStatus('unauthenticated')
+        return
+      }
+
+      tokensRef.current = {
+        accessToken: result.token.access_token,
+        refreshToken: result.token.refresh_token,
+        expiresAt: Date.now() + result.token.expires_in * 1000,
+      }
+      setUser(result.user)
+      setStatus('authenticated')
+    })
+
+    return () => {
+      cancelledRef.current = true
+    }
+  }, [])
 
   const value = useMemo<AuthContextValue>(
     () => ({ status, user, login, completeCallback, logout, getAccessToken }),

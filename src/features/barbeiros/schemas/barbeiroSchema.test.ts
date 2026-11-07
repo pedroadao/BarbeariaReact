@@ -6,7 +6,7 @@ describe('barbeiroFormSchema', () => {
     const result = barbeiroFormSchema.safeParse({
       nome: 'João',
       email: 'joao@teste.com',
-      telefone: '11999990000',
+      telefone: '+55 (11) 99999-0000',
       instagram: '',
       dataNascimento: '1990-01-01',
       idTipoUsuario: 1,
@@ -19,7 +19,7 @@ describe('barbeiroFormSchema', () => {
     const result = barbeiroFormSchema.safeParse({
       nome: 'João',
       email: 'não-é-email',
-      telefone: '11999990000',
+      telefone: '+55 (11) 99999-0000',
       dataNascimento: '1990-01-01',
       idTipoUsuario: 1,
     })
@@ -31,7 +31,7 @@ describe('barbeiroFormSchema', () => {
     const result = barbeiroFormSchema.safeParse({
       nome: '',
       email: 'joao@teste.com',
-      telefone: '11999990000',
+      telefone: '+55 (11) 99999-0000',
       dataNascimento: '1990-01-01',
       idTipoUsuario: 1,
     })

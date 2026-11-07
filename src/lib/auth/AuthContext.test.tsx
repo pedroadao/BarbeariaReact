@@ -65,7 +65,7 @@ describe('AuthContext', () => {
     expect(authApi.exchangeCodeForToken).not.toHaveBeenCalled()
   })
 
-  it('logout limpa usuário, status e redireciona para o end-session', async () => {
+  it('logout limpa usuário e status sem navegar para fora do SPA', async () => {
     vi.mocked(pkce.consumePkceState).mockReturnValue({ codeVerifier: 'v', state: 's', returnTo: '/' })
     vi.mocked(authApi.exchangeCodeForToken).mockResolvedValue({
       access_token: 'token-123',
@@ -73,7 +73,6 @@ describe('AuthContext', () => {
       expires_in: 3600,
     })
     vi.mocked(authApi.fetchMe).mockResolvedValue({ id: '1', email: 'a@b.com', name: 'Ana' })
-    vi.mocked(authApi.logoutRedirect).mockImplementation(() => {})
 
     const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() })
 
@@ -89,7 +88,7 @@ describe('AuthContext', () => {
 
     await waitFor(() => expect(result.current.status).toBe('unauthenticated'))
     expect(result.current.user).toBeNull()
-    expect(authApi.logoutRedirect).toHaveBeenCalledOnce()
+    expect(authApi.logoutRedirect).not.toHaveBeenCalled()
   })
 
   it('getAccessToken retorna null quando não há sessão', async () => {

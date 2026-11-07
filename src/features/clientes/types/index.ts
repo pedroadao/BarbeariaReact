@@ -6,6 +6,7 @@ export interface Cliente {
   instagram: string | null
   dataNascimento: string
   idTipoUsuario: number
+  mostrarCadastroSempre: boolean
 }
 
 export interface CreateClienteInput {
@@ -17,4 +18,6 @@ export interface CreateClienteInput {
   idTipoUsuario: number
 }
 
-export type UpdateClienteInput = CreateClienteInput
+export interface UpdateClienteInput extends CreateClienteInput {
+  mostrarCadastroSempre: boolean
+}

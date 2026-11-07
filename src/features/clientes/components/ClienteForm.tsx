@@ -1,9 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import Button from '@mui/material/Button'
+import InputAdornment from '@mui/material/InputAdornment'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import { useForm } from 'react-hook-form'
 import { clienteFormSchema, type ClienteFormValues } from '../schemas/clienteSchema'
+import { PhoneField } from '../../../components/form/PhoneField'
 
 interface ClienteFormProps {
   defaultValues?: Partial<ClienteFormValues>
@@ -15,6 +17,7 @@ interface ClienteFormProps {
 export function ClienteForm({ defaultValues, isSubmitting, submitLabel, onSubmit }: ClienteFormProps) {
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<ClienteFormValues>({
@@ -52,15 +55,7 @@ export function ClienteForm({ defaultValues, isSubmitting, submitLabel, onSubmit
           {...register('email')}
         />
 
-        <TextField
-          id="cliente-telefone"
-          label="Telefone"
-          type="tel"
-          autoComplete="tel"
-          error={!!errors.telefone}
-          helperText={errors.telefone?.message}
-          {...register('telefone')}
-        />
+        <PhoneField control={control} name="telefone" idPrefix="cliente" error={errors.telefone?.message} />
 
         <TextField
           id="cliente-instagram"
@@ -68,7 +63,12 @@ export function ClienteForm({ defaultValues, isSubmitting, submitLabel, onSubmit
           type="text"
           error={!!errors.instagram}
           helperText={errors.instagram?.message}
-          {...register('instagram')}
+          slotProps={{ input: { startAdornment: <InputAdornment position="start">@</InputAdornment> } }}
+          {...register('instagram', {
+            onChange: (event) => {
+              event.target.value = event.target.value.replace(/^@+/, '')
+            },
+          })}
         />
 
         <TextField

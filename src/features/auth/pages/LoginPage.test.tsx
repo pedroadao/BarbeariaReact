@@ -4,10 +4,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AuthProvider } from '../../../lib/auth/AuthContext'
+import { trySilentLogin } from '../../../lib/auth/silentRenew'
 import * as authApi from '../api/authApi'
 import { LoginPage } from './LoginPage'
 
 vi.mock('../api/authApi')
+vi.mock('../../../lib/auth/silentRenew')
 
 function renderLoginPage() {
   const queryClient = new QueryClient()
@@ -18,7 +20,7 @@ function renderLoginPage() {
         <AuthProvider>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/barbeiros" element={<div>Página de barbeiros</div>} />
+            <Route path="/agendamentos" element={<div>Página de agendamentos</div>} />
             <Route path="/registrar" element={<div>Página de cadastro</div>} />
           </Routes>
         </AuthProvider>
@@ -31,6 +33,7 @@ describe('LoginPage', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     vi.mocked(authApi.startAuthorize).mockResolvedValue(undefined)
+    vi.mocked(trySilentLogin).mockResolvedValue(null)
   })
 
   it('exibe mensagens de validação quando os campos estão vazios', async () => {
@@ -53,7 +56,7 @@ describe('LoginPage', () => {
     await user.type(screen.getByLabelText('Senha'), 'senha123')
     await user.click(screen.getByRole('button', { name: 'Entrar' }))
 
-    await waitFor(() => expect(authApi.startAuthorize).toHaveBeenCalledWith('/barbeiros'))
+    await waitFor(() => expect(authApi.startAuthorize).toHaveBeenCalledWith('/agendamentos'))
     expect(authApi.login).toHaveBeenCalledWith({ email: 'barbeiro@barbearia.com', senha: 'senha123' })
   })
 

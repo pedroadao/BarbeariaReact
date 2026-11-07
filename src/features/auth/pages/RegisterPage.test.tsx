@@ -41,7 +41,7 @@ describe('RegisterPage', () => {
 
     await user.type(screen.getByLabelText('Nome'), 'Maria Cliente')
     await user.type(screen.getByLabelText('E-mail'), 'maria@cliente.com')
-    await user.type(screen.getByLabelText('Senha'), 'senha1234')
+    await user.type(screen.getByLabelText('Senha'), 'Senha1234')
     await user.type(screen.getByLabelText('Confirmar senha'), 'outrasenha')
     await user.click(screen.getByRole('button', { name: 'Criar conta' }))
 
@@ -56,16 +56,16 @@ describe('RegisterPage', () => {
 
     await user.type(screen.getByLabelText('Nome'), 'Maria Cliente')
     await user.type(screen.getByLabelText('E-mail'), 'maria@cliente.com')
-    await user.type(screen.getByLabelText('Senha'), 'senha1234')
-    await user.type(screen.getByLabelText('Confirmar senha'), 'senha1234')
+    await user.type(screen.getByLabelText('Senha'), 'Senha1234')
+    await user.type(screen.getByLabelText('Confirmar senha'), 'Senha1234')
     await user.click(screen.getByRole('button', { name: 'Criar conta' }))
 
     expect(await screen.findByText('Página de login')).toBeInTheDocument()
     expect(authApi.register).toHaveBeenCalledWith({
       nome: 'Maria Cliente',
       email: 'maria@cliente.com',
-      senha: 'senha1234',
-      confirmarSenha: 'senha1234',
+      senha: 'Senha1234',
+      confirmarSenha: 'Senha1234',
     })
   })
 
@@ -77,8 +77,8 @@ describe('RegisterPage', () => {
 
     await user.type(screen.getByLabelText('Nome'), 'Maria Cliente')
     await user.type(screen.getByLabelText('E-mail'), 'maria@cliente.com')
-    await user.type(screen.getByLabelText('Senha'), 'senha1234')
-    await user.type(screen.getByLabelText('Confirmar senha'), 'senha1234')
+    await user.type(screen.getByLabelText('Senha'), 'Senha1234')
+    await user.type(screen.getByLabelText('Confirmar senha'), 'Senha1234')
     await user.click(screen.getByRole('button', { name: 'Criar conta' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('E-mail já cadastrado.')

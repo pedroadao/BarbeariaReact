@@ -1,24 +1,28 @@
 import AppBar from '@mui/material/AppBar'
 import Button from '@mui/material/Button'
 import Container from '@mui/material/Container'
+import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../lib/auth/useAuth'
+import { isAdmin } from '../../lib/auth/roles'
 
-const NAV_ITEMS = [
-  { to: '/barbeiros', label: 'Barbeiros' },
-  { to: '/clientes', label: 'Clientes' },
+const BASE_NAV_ITEMS = [
   { to: '/agendamentos', label: 'Agendamentos' },
+  { to: '/meus-dados', label: 'Meus dados' },
 ]
+
+const ADMIN_NAV_ITEM = { to: '/admin', label: 'Administração' }
 
 export function AppLayout() {
   const { pathname } = useLocation()
-  const { logout } = useAuth()
+  const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const currentTab = NAV_ITEMS.some((item) => item.to === pathname) ? pathname : NAV_ITEMS[0].to
+  const navItems = isAdmin(user) ? [...BASE_NAV_ITEMS, ADMIN_NAV_ITEM] : BASE_NAV_ITEMS
+  const currentTab = navItems.some((item) => item.to === pathname) ? pathname : navItems[0].to
 
   function handleLogout() {
     logout()
@@ -32,12 +36,15 @@ export function AppLayout() {
           <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }}>
             Barbearia
           </Typography>
-          <Button color="inherit" onClick={handleLogout}>
-            Sair
-          </Button>
+          <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+            {user && <Typography>{user.name}</Typography>}
+            <Button color="inherit" onClick={handleLogout}>
+              Sair
+            </Button>
+          </Stack>
         </Toolbar>
         <Tabs value={currentTab} textColor="inherit" indicatorColor="secondary">
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <Tab key={item.to} label={item.label} value={item.to} component={Link} to={item.to} />
           ))}
         </Tabs>

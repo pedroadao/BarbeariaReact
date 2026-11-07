@@ -45,10 +45,7 @@ export function LoginPage() {
     setSubmitError(null)
     setIsSubmitting(true)
     try {
-      const redirectTo = (location.state as { from?: string } | null)?.from ?? '/barbeiros'
-      // Em caso de sucesso, a página é substituída pela navegação ao
-      // Authentication (/connect/authorize) e depois pelo /callback; não há
-      // "retorno" para tratar aqui além de um eventual erro.
+      const redirectTo = (location.state as { from?: string } | null)?.from ?? '/agendamentos'
       await login(values, redirectTo)
     } catch (error) {
       setSubmitError(errorMessage(error))

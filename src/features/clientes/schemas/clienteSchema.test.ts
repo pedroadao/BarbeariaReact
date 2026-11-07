@@ -6,7 +6,7 @@ describe('clienteFormSchema', () => {
     const result = clienteFormSchema.safeParse({
       nome: 'Maria',
       email: 'maria@teste.com',
-      telefone: '11988880000',
+      telefone: '+55 (11) 98888-0000',
       instagram: '',
       dataNascimento: '1992-02-02',
       idTipoUsuario: 2,
