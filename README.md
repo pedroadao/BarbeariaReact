@@ -7,6 +7,8 @@ Frontend React para a [API de Barbearia](https://github.com/pedroadao/Barbearia)
 - React 19 + TypeScript (`strict`)
 - Vite
 - React Router
+- Material UI (MUI)
+- Autenticação OAuth 2.0 / OIDC (Authorization Code + PKCE) via projeto `Authentication`
 - TanStack Query (cache e sincronização de dados remotos)
 - React Hook Form + Zod (formulários e validação)
 - oxlint (lint)
@@ -16,7 +18,20 @@ Frontend React para a [API de Barbearia](https://github.com/pedroadao/Barbearia)
 
 - **Barbeiros**: listar, criar, editar e excluir.
 - **Clientes**: listar, criar, editar e excluir.
-- **Agendamentos**: listar, criar (associando barbeiro e, opcionalmente, cliente) e excluir horários.
+- **Agendamentos**: visualização em calendário, criar (associando barbeiro e, opcionalmente, cliente) e excluir horários.
+- **Autenticação**: login, registro e recuperação de senha via provedor OIDC (`Authentication`), com renovação silenciosa de token.
+- **Completar cadastro / Meus dados**: o usuário autenticado completa e edita seus dados de cliente.
+- **Admin**: área restrita ao administrador.
+
+### Rotas
+
+| Rota | Acesso |
+|---|---|
+| `/login`, `/registrar` | Pública |
+| `/callback`, `/silent-callback`, `/acesso-negado` | Fluxo OIDC |
+| `/completar-cadastro`, `/meus-dados` | Autenticado |
+| `/agendamentos` (padrão), `/barbeiros`, `/clientes` | Autenticado |
+| `/admin` | Administrador |
 
 ## Como executar
 
@@ -44,7 +59,7 @@ docker run -p 8082:80 barbearia-react
 
 ### Localmente (sem Docker)
 
-Requer a API do `Barbearia` rodando (local ou via Docker) e Node.js instalado.
+Requer a API do `Barbearia` e o projeto `Authentication` rodando (local ou via Docker) e Node.js instalado.
 
 1. Copie `.env.example` para `.env.local` e ajuste `VITE_API_BASE_URL` para a URL da API:
 
@@ -66,6 +81,12 @@ A aplicação fica disponível em `http://localhost:5174`.
 | Variável | Descrição |
 |---|---|
 | `VITE_API_BASE_URL` | URL base da API do Barbearia (ex.: `http://localhost:8081`) |
+| `VITE_AUTH_BASE_URL` | URL do projeto Authentication (provedor OIDC, ex.: `https://localhost:7179`) |
+| `VITE_OIDC_CLIENT_ID` | `client_id` público do frontend (ex.: `barbearia-spa-client`) |
+| `VITE_OIDC_REDIRECT_URI` | URI de callback (ex.: `http://localhost:5174/callback`) |
+| `VITE_OIDC_SCOPE` | Escopos OIDC (ex.: `openid email profile offline_access`) |
+
+Todas são obrigatórias e validadas com Zod na inicialização. No Docker, são build args (ver `docker-compose.yml`) e o `redirect_uri` padrão usa a porta `8082`.
 
 `.env.local` não é versionado; use `.env.example` como referência.
 
@@ -74,13 +95,15 @@ A aplicação fica disponível em `http://localhost:5174`.
 ```bash
 npm run dev        # servidor de desenvolvimento (Vite)
 npm run build      # typecheck + build de produção
-npm run lint        # lint (oxlint)
-npm run typecheck   # verificação de tipos TypeScript
+npm run lint       # lint (oxlint)
+npm run typecheck  # verificação de tipos TypeScript
 npm run test        # testes (Vitest)
 npm run preview     # preview do build de produção
 ```
 
 ## Observações sobre o contrato da API
 
-- A API não expõe autenticação nem atualização (`PUT`) de agendamentos; por isso a tela de Agendamentos permite apenas criar (com ou sem cliente associado) e excluir horários.
+- A autenticação é delegada ao projeto `Authentication` (OIDC com PKCE); o frontend não guarda segredos (client público).
+- O perfil de administrador é identificado no frontend por e-mail (`src/lib/auth/roles.ts`); a autorização real deve ser validada pela API.
+- A API não expõe atualização (`PUT`) de agendamentos; por isso a tela de Agendamentos permite apenas criar (com ou sem cliente associado) e excluir horários.
 - O campo "Tipo de usuário" é enviado automaticamente pelo frontend (fixo por tela) e não é exibido nos formulários de Barbeiro/Cliente.
