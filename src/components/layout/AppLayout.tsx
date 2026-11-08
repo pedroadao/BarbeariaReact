@@ -10,18 +10,17 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../lib/auth/useAuth'
 import { isAdmin } from '../../lib/auth/roles'
 
-const BASE_NAV_ITEMS = [
-  { to: '/agendamentos', label: 'Agendamentos' },
-  { to: '/meus-dados', label: 'Meus dados' },
-]
-
+const AGENDAMENTOS_NAV_ITEM = { to: '/agendamentos', label: 'Agendamentos' }
+const MEUS_DADOS_NAV_ITEM = { to: '/meus-dados', label: 'Meus dados' }
 const ADMIN_NAV_ITEM = { to: '/admin', label: 'Administração' }
 
 export function AppLayout() {
   const { pathname } = useLocation()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const navItems = isAdmin(user) ? [...BASE_NAV_ITEMS, ADMIN_NAV_ITEM] : BASE_NAV_ITEMS
+  const navItems = isAdmin(user)
+    ? [AGENDAMENTOS_NAV_ITEM, ADMIN_NAV_ITEM]
+    : [AGENDAMENTOS_NAV_ITEM, MEUS_DADOS_NAV_ITEM]
   const currentTab = navItems.some((item) => item.to === pathname) ? pathname : navItems[0].to
 
   function handleLogout() {

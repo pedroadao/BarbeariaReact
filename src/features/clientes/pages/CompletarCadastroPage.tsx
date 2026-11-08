@@ -46,6 +46,11 @@ export function CompletarCadastroPage() {
   })
 
   const clienteNaoExisteAinda = error instanceof HttpError && error.kind === 'notFound'
+  const contaDeOutroTipo = error instanceof HttpError && error.kind === 'conflict'
+
+  useEffect(() => {
+    if (contaDeOutroTipo) navigate(returnTo, { replace: true })
+  }, [contaDeOutroTipo, navigate, returnTo])
 
   const {
     register,
@@ -90,7 +95,7 @@ export function CompletarCadastroPage() {
     )
   }
 
-  if (isLoading) {
+  if (isLoading || contaDeOutroTipo) {
     return (
       <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Typography>Carregando seus dados…</Typography>

@@ -6,11 +6,13 @@ import Typography from '@mui/material/Typography'
 import { AgendamentosPage } from '../../agendamentos/pages/AgendamentosPage'
 import { BarbeirosPage } from '../../barbeiros/pages/BarbeirosPage'
 import { ClientesPage } from '../../clientes/pages/ClientesPage'
+import { LogAlteracoesPage } from '../../logs/pages/LogAlteracoesPage'
 
 const ADMIN_TABS = [
   { value: 'clientes', label: 'Clientes', Component: ClientesPage },
   { value: 'barbeiros', label: 'Barbeiros', Component: BarbeirosPage },
   { value: 'agendamentos', label: 'Agendamentos', Component: AgendamentosPage },
+  { value: 'logs', label: 'Log de alterações', Component: LogAlteracoesPage },
 ] as const
 
 type AdminTabValue = (typeof ADMIN_TABS)[number]['value']
