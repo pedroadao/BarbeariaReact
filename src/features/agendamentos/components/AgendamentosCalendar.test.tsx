@@ -23,6 +23,7 @@ const agendamento: Agendamento = {
   horaFim: '10:00:00',
   idCliente: null,
   disponivel: true,
+  nomeClienteAvulso: null,
 }
 
 describe('AgendamentosCalendar', () => {

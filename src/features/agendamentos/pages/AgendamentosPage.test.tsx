@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { HttpError } from '../../../lib/http/httpClient'
 import * as useAuthModule from '../../../lib/auth/useAuth'
 import * as barbeirosApi from '../../barbeiros/api/barbeirosApi'
 import type { Barbeiro } from '../../barbeiros/types'
@@ -66,6 +67,7 @@ const agendamento: Agendamento = {
   horaFim: '10:00:00',
   idCliente: null,
   disponivel: true,
+  nomeClienteAvulso: null,
 }
 
 function renderPage() {
@@ -83,6 +85,9 @@ describe('AgendamentosPage', () => {
     mockUser('admin@admin.com')
     vi.mocked(barbeirosApi.listBarbeiros).mockResolvedValue([barbeiro])
     vi.mocked(clientesApi.listClientes).mockResolvedValue([cliente])
+    vi.mocked(barbeirosApi.getMeBarbeiro).mockRejectedValue(
+      new HttpError('notFound', 'Nenhum cadastro de barbeiro associado ao usuário autenticado.', 404, null),
+    )
   })
 
   it('recarrega a lista de agendamentos ao clicar em Recarregar', async () => {
@@ -212,5 +217,43 @@ describe('AgendamentosPage', () => {
     await screen.findAllByText(/Reservado/)
 
     expect(screen.getAllByRole('button', { name: 'Excluir' })).toHaveLength(1)
+  })
+
+  it('não quebra a página quando o usuário autenticado é um barbeiro (sem cadastro de cliente)', async () => {
+    const { HttpError } = await import('../../../lib/http/httpClient')
+    mockUser('barbeiro@barbearia.com')
+    vi.mocked(clientesApi.getMeCliente).mockRejectedValue(
+      new HttpError(
+        'conflict',
+        'O usuário autenticado já possui um cadastro de outro tipo (barbeiro ou administrador) e não pode completar um cadastro de cliente.',
+        409,
+        { codigo: 'Cliente.ContaDeOutroTipo' },
+      ),
+    )
+    vi.mocked(agendamentosApi.listAgendamentos).mockResolvedValue([agendamento])
+
+    renderPage()
+
+    await screen.findAllByText(/João Barbeiro/)
+    expect(screen.queryByText(/erro inesperado/i)).not.toBeInTheDocument()
+  })
+
+  it('não mostra o botão Novo horário para o barbeiro autenticado', async () => {
+    mockUser('barbeiro@barbearia.com')
+    vi.mocked(barbeirosApi.getMeBarbeiro).mockResolvedValue(barbeiro)
+    vi.mocked(clientesApi.getMeCliente).mockRejectedValue(
+      new HttpError(
+        'conflict',
+        'O usuário autenticado já possui um cadastro de outro tipo (barbeiro ou administrador) e não pode completar um cadastro de cliente.',
+        409,
+        { codigo: 'Cliente.ContaDeOutroTipo' },
+      ),
+    )
+    vi.mocked(agendamentosApi.listAgendamentos).mockResolvedValue([agendamento])
+
+    renderPage()
+
+    await screen.findAllByText(/João Barbeiro/)
+    expect(screen.queryByRole('button', { name: 'Novo horário' })).not.toBeInTheDocument()
   })
 })

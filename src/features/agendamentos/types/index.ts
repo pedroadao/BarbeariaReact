@@ -6,6 +6,7 @@ export interface Agendamento {
   horaFim: string
   idCliente: number | null
   disponivel: boolean
+  nomeClienteAvulso: string | null
 }
 
 export interface CreateAgendamentoInput {

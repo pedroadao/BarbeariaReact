@@ -9,8 +9,10 @@ import Typography from '@mui/material/Typography'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../lib/auth/useAuth'
 import { isAdmin } from '../../lib/auth/roles'
+import { useMeBarbeiro } from '../../features/barbeiros/hooks/useBarbeiros'
 
 const AGENDAMENTOS_NAV_ITEM = { to: '/agendamentos', label: 'Agendamentos' }
+const FILA_NAV_ITEM = { to: '/fila', label: 'Fila' }
 const MEUS_DADOS_NAV_ITEM = { to: '/meus-dados', label: 'Meus dados' }
 const ADMIN_NAV_ITEM = { to: '/admin', label: 'Administração' }
 
@@ -18,9 +20,13 @@ export function AppLayout() {
   const { pathname } = useLocation()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const navItems = isAdmin(user)
+  const admin = isAdmin(user)
+  const { data: barbeiro } = useMeBarbeiro()
+  const navItems = admin
     ? [AGENDAMENTOS_NAV_ITEM, ADMIN_NAV_ITEM]
-    : [AGENDAMENTOS_NAV_ITEM, MEUS_DADOS_NAV_ITEM]
+    : barbeiro
+      ? [AGENDAMENTOS_NAV_ITEM, FILA_NAV_ITEM]
+      : [AGENDAMENTOS_NAV_ITEM, MEUS_DADOS_NAV_ITEM]
   const currentTab = navItems.some((item) => item.to === pathname) ? pathname : navItems[0].to
 
   function handleLogout() {

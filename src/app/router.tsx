@@ -10,6 +10,7 @@ import { SilentCallbackPage } from '../features/auth/pages/SilentCallbackPage'
 import { BarbeirosPage } from '../features/barbeiros/pages/BarbeirosPage'
 import { ClientesPage } from '../features/clientes/pages/ClientesPage'
 import { CompletarCadastroPage } from '../features/clientes/pages/CompletarCadastroPage'
+import { FilaPage } from '../features/fila/pages/FilaPage'
 import { AdminRoute } from '../routes/AdminRoute'
 import { ProtectedRoute } from '../routes/ProtectedRoute'
 import { PublicRoute } from '../routes/PublicRoute'
@@ -31,6 +32,7 @@ export function AppRouter() {
           <Route path="/barbeiros" element={<BarbeirosPage />} />
           <Route path="/clientes" element={<ClientesPage />} />
           <Route path="/agendamentos" element={<AgendamentosPage />} />
+          <Route path="/fila" element={<FilaPage />} />
           <Route path="/meus-dados" element={<CompletarCadastroPage />} />
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminPage />} />

@@ -9,6 +9,10 @@ export function getBarbeiro(id: number, signal?: AbortSignal): Promise<Barbeiro>
   return request<Barbeiro>(`/barbeiros/${id}`, { signal })
 }
 
+export function getMeBarbeiro(signal?: AbortSignal): Promise<Barbeiro> {
+  return request<Barbeiro>('/barbeiros/me', { signal })
+}
+
 export function createBarbeiro(input: CreateBarbeiroInput): Promise<Barbeiro> {
   return request<Barbeiro>('/barbeiros', {
     method: 'POST',

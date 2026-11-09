@@ -14,7 +14,7 @@ import Typography from '@mui/material/Typography'
 import { HttpError } from '../../../lib/http/httpClient'
 import { useAuth } from '../../../lib/auth/useAuth'
 import { isAdmin } from '../../../lib/auth/roles'
-import { useBarbeiros } from '../../barbeiros/hooks/useBarbeiros'
+import { useBarbeiros, useMeBarbeiro } from '../../barbeiros/hooks/useBarbeiros'
 import { useClientes, useMeCliente } from '../../clientes/hooks/useClientes'
 import { AgendamentoForm } from '../components/AgendamentoForm'
 import { AgendamentosCalendar } from '../components/AgendamentosCalendar'
@@ -32,6 +32,7 @@ export function AgendamentosPage() {
   const admin = isAdmin(user)
   const podeEscolherCliente = admin
   const { data: meCliente } = useMeCliente(!admin)
+  const { data: barbeiro } = useMeBarbeiro()
   const { data: agendamentos, isLoading, isFetching, isError, error, refetch } = useAgendamentos()
   const { data: barbeiros, refetch: refetchBarbeiros } = useBarbeiros()
   const { data: clientes, refetch: refetchClientes } = useClientes()
@@ -83,9 +84,11 @@ export function AgendamentosPage() {
       </Typography>
 
       <Stack direction="row" spacing={2}>
-        <Button variant="contained" onClick={() => setModalAberto(true)}>
-          Novo horário
-        </Button>
+        {!barbeiro && (
+          <Button variant="contained" onClick={() => setModalAberto(true)}>
+            Novo horário
+          </Button>
+        )}
         <Button variant="outlined" onClick={handleRecarregar} disabled={isFetching}>
           {isFetching ? 'Recarregando...' : 'Recarregar'}
         </Button>
@@ -160,7 +163,7 @@ export function AgendamentosPage() {
                     secondary={
                       agendamento.disponivel
                         ? 'Disponível'
-                        : `Reservado (${nomeCliente(agendamento.idCliente as number)})`
+                        : `Reservado (${agendamento.idCliente ? nomeCliente(agendamento.idCliente) : agendamento.nomeClienteAvulso ?? 'Cliente avulso'})`
                     }
                   />
                 </ListItem>

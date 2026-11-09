@@ -25,7 +25,11 @@ export function useMeCliente(enabled: boolean) {
     queryFn: ({ signal }) => getMeCliente(signal),
     enabled,
     retry: false,
-    throwOnError: (error) => !(error instanceof HttpError && error.kind === 'notFound'),
+    // 'notFound': usuário ainda não tem cadastro de cliente. 'conflict' (Cliente.ContaDeOutroTipo):
+    // usuário autenticado é barbeiro/administrador, não cliente. Ambos são estados esperados e não
+    // devem derrubar a árvore de componentes (não há Error Boundary na aplicação).
+    throwOnError: (error) =>
+      !(error instanceof HttpError && (error.kind === 'notFound' || error.kind === 'conflict')),
   })
 }
 

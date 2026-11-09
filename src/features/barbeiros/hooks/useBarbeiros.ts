@@ -1,18 +1,30 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { HttpError } from '../../../lib/http/httpClient'
 import {
   createBarbeiro,
   deleteBarbeiro,
+  getMeBarbeiro,
   listBarbeiros,
   updateBarbeiro,
 } from '../api/barbeirosApi'
 import type { CreateBarbeiroInput, UpdateBarbeiroInput } from '../types'
 
 const barbeirosKey = ['barbeiros'] as const
+const meBarbeiroKey = ['barbeiros', 'me'] as const
 
 export function useBarbeiros() {
   return useQuery({
     queryKey: barbeirosKey,
     queryFn: ({ signal }) => listBarbeiros(signal),
+  })
+}
+
+export function useMeBarbeiro() {
+  return useQuery({
+    queryKey: meBarbeiroKey,
+    queryFn: ({ signal }) => getMeBarbeiro(signal),
+    retry: false,
+    throwOnError: (error) => !(error instanceof HttpError && error.kind === 'notFound'),
   })
 }
 
