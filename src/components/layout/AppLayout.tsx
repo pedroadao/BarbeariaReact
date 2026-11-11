@@ -13,6 +13,7 @@ import { useMeBarbeiro } from '../../features/barbeiros/hooks/useBarbeiros'
 
 const AGENDAMENTOS_NAV_ITEM = { to: '/agendamentos', label: 'Agendamentos' }
 const FILA_NAV_ITEM = { to: '/fila', label: 'Fila' }
+const FILA_BARBEIRO_NAV_ITEM = { to: '/fila-barbeiro', label: 'Fila dos barbeiros' }
 const MEUS_DADOS_NAV_ITEM = { to: '/meus-dados', label: 'Meus dados' }
 const ADMIN_NAV_ITEM = { to: '/admin', label: 'Administração' }
 
@@ -26,7 +27,7 @@ export function AppLayout() {
     ? [AGENDAMENTOS_NAV_ITEM, ADMIN_NAV_ITEM]
     : barbeiro
       ? [AGENDAMENTOS_NAV_ITEM, FILA_NAV_ITEM]
-      : [AGENDAMENTOS_NAV_ITEM, MEUS_DADOS_NAV_ITEM]
+      : [AGENDAMENTOS_NAV_ITEM, FILA_BARBEIRO_NAV_ITEM, MEUS_DADOS_NAV_ITEM]
   const currentTab = navItems.some((item) => item.to === pathname) ? pathname : navItems[0].to
 
   function handleLogout() {
